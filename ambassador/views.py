@@ -1,3 +1,19 @@
-from django.shortcuts import render
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
-# Create your views here.
+from ambassador.serializers import ProductSerializer
+from core.models import Product
+
+
+class ProductFrontendAPIView(APIView):
+    def get(self, _):
+        products = Product.objects.all()
+        serializer = ProductSerializer(products, many=True)
+        return Response(serializer.data)
+
+
+class ProductBackendAPIView(APIView):
+    def get(self, _):
+        products = Product.objects.all()
+        serializer = ProductSerializer(products, many=True)
+        return Response(serializer.data)
