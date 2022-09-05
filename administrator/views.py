@@ -1,11 +1,13 @@
+from django.core.cache import cache
+
 from rest_framework import generics, mixins
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from administrator.serializers import ProductSerializer, LinkSerializer, OrderSerializer
 from common.authentication import JWTAuthentication
 from common.serializers import UserSerializer
+from administrator.serializers import ProductSerializer, LinkSerializer, OrderSerializer
 from core.models import User, Product, Link, Order
 
 
@@ -37,13 +39,28 @@ class ProductGenericAPIView(
         return self.list(request)
 
     def post(self, request):
-        return self.create(request)
+        response = self.create(request)
+        for key in cache.keys('*'):
+            if 'products_frontend' in key:
+                cache.delete(key)
+        cache.delete('products_backend')
+        return response
 
     def put(self, request, pk=None):
-        return self.partial_update(request, pk)
+        response = self.partial_update(request, pk)
+        for key in cache.keys('*'):
+            if 'products_frontend' in key:
+                cache.delete(key)
+        cache.delete('products_backend')
+        return response
 
     def delete(self, request, pk=None):
-        return self.destroy(request, pk)
+        response = self.destroy(request, pk)
+        for key in cache.keys('*'):
+            if 'products_frontend' in key:
+                cache.delete(key)
+        cache.delete('products_backend')
+        return response
 
 
 class LinkAPIView(APIView):
@@ -65,3 +82,4 @@ class OrderAPIView(APIView):
         serializer = OrderSerializer(orders, many=True)
 
         return Response(serializer.data)
+
