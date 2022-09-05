@@ -101,6 +101,11 @@ class Order(models.Model):
         items = OrderItem.objects.filter(order_id=self.pk)
         return sum(i.ambassador_revenue for i in items)
 
+    @property
+    def admin_revenue(self):
+        items = OrderItem.objects.filter(order_id=self.pk)
+        return sum(i.admin_revenue for i in items)
+
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='order_items')
